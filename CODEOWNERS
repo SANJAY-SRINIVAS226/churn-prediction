@@ -1,0 +1,15 @@
+# CODEOWNERS file for churn-prediction
+# This file defines who is responsible for code in a repository.
+# Each line is a file pattern followed by one or more owners.
+# Order is important; the last matching pattern takes precedence.
+
+# Global owners - these people will be the default owners for everything in
+# the repository unless a later match takes precedence.
+* @SANJAY-SRINIVAS226 
+
+# Example patterns:
+# *.js @frontend-team
+# *.py @backend-team
+# docs/ @docs-team
+# tests/ @qa-team
+
