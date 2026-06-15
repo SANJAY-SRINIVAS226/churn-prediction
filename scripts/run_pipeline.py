@@ -50,8 +50,11 @@ from src.utils.validate_data import validate_telco_data
 def main(args):
     """Main orchestrator function running the complete machine learning life cycle."""
 
-    # === FIXED: Windows File URI Setup using Pathlib ===
-    project_root = Path(os.getcwd()).parent.absolute()
+    # 🌟 FIXED: Force project_root to stay right here in your main churn-prediction folder!
+    # This ensures your 'artifacts' and 'mlruns' folders are created exactly where you can see them.
+    project_root = Path(os.getcwd()).absolute()
+    
+    # Convert your mlruns directory into a clean Windows-friendly URL link
     mlruns_path = args.mlflow_uri or project_root.joinpath("mlruns").as_uri()
 
     mlflow.set_tracking_uri(mlruns_path)
