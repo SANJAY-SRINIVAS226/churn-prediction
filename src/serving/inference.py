@@ -9,7 +9,7 @@ which is CRITICAL for model accuracy in production.
 
 import glob
 import os
-import mlflow
+import mlflow.xgboost
 import pandas as pd
 
 # === MODEL LOADING CONFIGURATION ===
@@ -17,7 +17,7 @@ MODEL_DIR = "/app/model"
 
 try:
     # Load the trained XGBoost model in MLflow pyfunc format
-    model = mlflow.pyfunc.load_model(MODEL_DIR)
+    model = mlflow.xgboost.load_model(MODEL_DIR)
     print(f"✅ Model loaded successfully from {MODEL_DIR}")
 except Exception as e:
     print(f"⚠️ Failed to load model from {MODEL_DIR}: {e}")
@@ -26,7 +26,7 @@ except Exception as e:
         local_model_paths = glob.glob("./mlruns/*/*/artifacts/model")
         if local_model_paths:
             latest_model = max(local_model_paths, key=os.path.getmtime)
-            model = mlflow.pyfunc.load_model(latest_model)
+            model = mlflow.xgboost.load_model(latest_model)
             MODEL_DIR = latest_model
             print(f"✅ Fallback: Loaded model from {latest_model}")
         else:

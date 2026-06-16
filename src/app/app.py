@@ -152,4 +152,12 @@ demo = gr.Interface(
 )
 
 # Mounts the Gradio webpage directly into your FastAPI application app
-app = gr.mount_gradio_app(app, demo, path="/ui")
+# Mounts the Gradio webpage directly into your FastAPI application app
+# Note the trailing slash in the path — this helps Gradio find its CSS/JS files!
+app = gr.mount_gradio_app(app, demo, path="/ui/")
+'''import uvicorn
+
+if __name__ == "__main__":
+    # This mounts your FastAPI app routes directly inside Gradio's server backend!
+    demo.mount_to_webapp(app)
+    uvicorn.run(app, host="127.0.0.1", port=8000)'''

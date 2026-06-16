@@ -7,32 +7,31 @@ WORKDIR /app
 # 3. Copy only dependency file first (for Docker caching)
 COPY requirements.txt .
 
-# 4. Install system tools and Python dependencies cleanly
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt \
+# 4. Install Python dependencies (add curl if you use MLflow local tracking URI)
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 5. Copy the entire project into the image
 COPY . .
 
-# 🌟 FIXED: Copy your optimized preprocessing and model assets directly 
-# from your local project's 'artifacts' folder into the container's flat /app/model folder.
-# This prevents hardcoded MLflow run-hash string failures completely!
-COPY artifacts/ /app/model/
-# Safely duplicate the artifact model folder structure to match your fallback paths
-COPY artifacts/ /app/src/serving/model/
+# Explicitly copy model (in case .dockerignore excluded mlruns)
+# NOTE: destination changed to /app/src/serving/model to match inference.py's path
+COPY src/serving/model /app/src/serving/model
 
-# Configure environmental variables
-# PYTHONPATH=/app ensures you can import 'src' modules smoothly inside the Linux container
+# Copy MLflow run (artifacts + metadata) to the flat /app/model convenience path
+COPY src/serving/model/3b1a41221fc44548aed629fa42b762e0/artifacts/model /app/model
+COPY src/serving/model/3b1a41221fc44548aed629fa42b762e0/artifacts/feature_columns.txt /app/model/feature_columns.txt
+COPY src/serving/model/3b1a41221fc44548aed629fa42b762e0/artifacts/preprocessing.pkl /app/model/preprocessing.pkl
+
+# make "serving" and "app" importable without the "src." prefix
+# ensures logs are shown in real-time (no buffering).
+# lets you import modules using from app... instead of from src.app....
 ENV PYTHONUNBUFFERED=1 \ 
-    PYTHONPATH=/app
+    PYTHONPATH=/app/src
 
 # 6. Expose FastAPI port
 EXPOSE 8000
 
-# 7. Run the FastAPI app using uvicorn
-# 🌟 FIXED: Make sure "app.py" or "main.py" matches your actual FastAPI filename!
-# If your serving file is called app.py inside src/, change "main:app" to "app:app"
-CMD ["python", "-m", "uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8000"]
+# 7. Run the FastAPI app using uvicorn (change path if needed)
+CMD ["python", "-m", "uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
